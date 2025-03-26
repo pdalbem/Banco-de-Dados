@@ -1,0 +1,47 @@
+services:
+    postgres:
+        image: postgres:17.4-alpine3.21
+        container_name: postgres_container
+        environment:
+            - POSTGRES_USER=postgres
+            - POSTGRES_PASSWORD=postgres
+        volumes:
+            - postgres-db-volume:/var/lib/postgresql/data
+        ports:
+            - 5432:5432
+        networks:
+            - postgres-db-network
+    pgadmin:
+        image: dpage/pgadmin4:9.1.0
+        container_name: pgadmin_container
+        environment:
+            PGADMIN_DEFAULT_EMAIL: 'dalbem@ifsp.edu.br'
+            PGADMIN_DEFAULT_PASSWORD: 'postgres'
+        ports:
+            - 16543:80
+        volumes:
+            - pgadmin-volume:/pgadmin4/servers.json
+            - pgadmin-volume:/var/lib/pgadmin
+        networks:
+            - postgres-db-network
+        depends_on:
+            - postgres
+
+volumes:
+    postgres-db-volume:
+        driver: local
+        driver_opts:
+            type: none
+            o: bind
+            device: ./data
+    pgadmin-volume:
+        driver: local
+        driver_opts:
+            type: none
+            o: bind
+            device: ./pgadmin_data
+networks:
+    postgres-db-network:
+        driver: bridge
+
+#docker exec -it  <container-name> psql -U <dataBaseUserName> <dataBaseName>

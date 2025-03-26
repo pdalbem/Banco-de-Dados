@@ -1,6 +1,6 @@
 # Data Definition Language (DDL)
 O DDL (Data Definition Language), ou Linguagem de Definição de Dados, é um conjunto de comandos SQL usados para definir, modificar e excluir estruturas de banco de dados, como tabelas, esquemas, índices, entre outros objetos. Permite também que se definam o domínio dos valores
-associados a cada atributo (tipos de dados), bem como as regras de integridade.
+associados a cada atributo (<a href="https://www.postgresql.org/docs/current/datatype.html" target="_blank">**tipos de dados**</a>) , bem como as regras de integridade.
 
 ## Comando CREATE
 O comando CREATE é usado para criar novos objetos de banco de dados, como tabelas, índices, visões e procedimentos armazenados.

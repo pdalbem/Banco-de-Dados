@@ -482,3 +482,300 @@ HAVING COUNT(*) > 1;
 | 1      | 2     |
 | 3      | 2     |
 
+## Junção de Tabelas
+Até aqui, trabalhamos apenas com consultas envolvendo uma única tabela.
+Agora, vamos aprender como consultar dados que estão distribuídos em múltiplas tabelas relacionadas.
+
+O comando JOIN é fundamental em SQL para combinar linhas de duas ou mais tabelas com base em uma coluna relacionada entre elas. Isso permite que você consulte dados que estão distribuídos em diferentes tabelas, criando visões mais completas e informativas.
+
+Existem diferentes tipos de JOINs, cada um com um comportamento específico em relação às linhas que são incluídas no resultado da consulta:
+
+### INNER JOIN
+
+INNER JOIN (ou simplesmente JOIN): Retorna apenas as linhas onde há uma correspondência nas colunas especificadas em ambas as tabelas. Linhas sem correspondência em alguma das tabelas são excluídas do resultado.
+
+Exemplo 1: Mostrar todos os cursos com o nome de suas respectivas categorias
+```sql
+SELECT c.codcur, c.nome, c.cargahoraria, c.preco, cat.descricao 
+FROM curso c INNER JOIN categoria cat
+ON c.categoria=cat.codcat;
+```
+
+| codcur | nome          | cargahoraria | preco   | descricao       |
+|--------|---------------|--------------|---------|-----------------|
+| 1      | Java          | 30           | 400.00  | Programação     |
+| 2      | PostgreSQL    | 30           | 600.00  | Banco de Dados  |
+| 3      | Deep Learning | 20           | 1000.00 | Machine Learning|
+| 4      | Python        | 20           | 500.00  | Programação     |
+| 5      | MySQL         | 30           | 500.00  | Banco de Dados  |
+
+
+Exemplo 2: Mostrar os dados dos alunos, com o nome e uf de suas respectivas cidades
+```sql
+SELECT a.codalu, a.cpf, a.nome, a.telefone, c.nome, c.uf
+FROM aluno a INNER JOIN cidade c
+ON a.cidade=c.codcid;  
+```
+
+| codalu | cpf           | nome      | telefone    | nome        | uf |
+|--------|---------------|-----------|-------------|-------------|----|
+| 1      | 11111111111   | Maria     | 9999-9999   | São Carlos  | SP |
+| 2      | 22222222222   | Celso     | 8888-8888   | São Carlos  | SP |
+| 3      | 33333333333   | Joaquim   | 7777-7777   | Araraquara  | SP |
+| 4      | 44444444444   | Florinda  | 6666-6666   | Londrina    | PR |
+| 5      | 55555555555   | Manoel    |             | Londrina    | PR |
+
+Exemplo 3: Mostrar os dados das matrículas, com os nomes dos alunos e dos cursos
+```sql
+SELECT a.nome "Aluno", c.nome "Curso", m.nota "Nota", to_char(m.datacurso, 'dd-mm-yyyy') "Data" 
+FROM aluno a INNER JOIN matricula m ON a.codalu=m.codalu
+INNER JOIN curso c  ON c.codcur=m.codcur;
+```
+| Aluno   | Curso         | Nota | Data       |
+|---------|---------------|------|------------|
+| Maria   | Java          | 9.5  | 14-02-2024 |
+| Maria   | PostgreSQL    | 10   | 01-03-2024 |
+| Celso   | Python        | 8.5  | 10-12-2023 |
+| Florinda| Python        | 9    | 01-04-2024 |
+| Celso   | MySQL         | 9    | 10-04-2024 |
+
+
+Exemplo 4: Mostrar os dados das matrículas, com os nomes dos alunos, nomes de suas respectivas cidades, nome dos cursos e suas respectivas categorias. Porém, mostre somente aquelas cujas notas sejam maior que 8 e a data do curso esteja entre 01/04/2024 e 30/04/2024 
+```sql
+SELECT a.nome "Aluno", ci.nome "Cidade",  c.nome "Curso", cat.descricao "Categoria", m.nota "Nota", to_char(m.datacurso, 'dd-mm-yyyy') "Data" 
+FROM matricula m INNER JOIN aluno a ON m.codalu=a.codalu
+INNER JOIN cidade ci ON ci.codcid=a.cidade
+INNER JOIN curso c ON c.codcur=m.codcur
+INNER JOIN categoria cat ON cat.codcat=c.categoria
+WHERE m.nota>8 AND m.datacurso BETWEEN '2024-04-01' AND '2024-04-30';
+```
+| Aluno    | Cidade   | Curso   | Categoria     | Nota | Data       |
+|----------|----------|---------|---------------|------|------------|
+| Florinda | Londrina | Python  | Programação   | 9    | 01-04-2024 |
+| Celso    | São Carlos| MySQL   | Banco de Dados| 9    | 10-04-2024 |
+
+Exemplo 5: Mostrar a quantidade de matrículas, agrupada pela descrição da categoria do curso. Porém, somente os registros entre 01-12-2023 e 30-05-2024”. Mostre apenas aqueles cuja quantidade seja maior que 1.
+
+```sql
+SELECT cat.descricao "Categoria", count(m.codcur) "Qtd"
+FROM curso c INNER JOIN matricula m ON m.codcur=c.codcur
+INNER JOIN categoria cat ON cat.codcat=c.categoria 
+WHERE m.datacurso BETWEEN '2023-12-01' AND '2024-05-30'
+GROUP BY cat.descricao
+HAVING count(m.codcur) > 1;
+```
+| Categoria     | Qtd |
+|---------------|-----|
+| Programação   | 3   |
+| Banco de Dados| 2   |
+
+Exemplo 6: Listar o nome dos alunos que estão matriculados em pelo menos dois cursos diferentes.
+```sql
+SELECT
+    a.nome AS nome_aluno
+FROM
+    aluno AS a
+JOIN
+    matricula AS m ON a.codalu = m.codalu
+GROUP BY
+    a.nome
+HAVING
+    COUNT(DISTINCT m.codcur) >= 2;
+ ```   
+| nome_aluno |
+|------------|
+| Celso      |
+| Maria      |
+
+Exemplo 7: Liste as categorias de cursos e o preço médio dos cursos em cada categoria, mostrando apenas as categorias com preço médio superior a 700.
+
+```sql
+SELECT
+    cat.descricao AS nome_categoria,
+    AVG(cu.preco) AS preco_medio
+FROM
+    categoria AS cat
+JOIN
+    curso AS cu ON cat.codcat = cu.categoria
+GROUP BY
+    cat.descricao
+HAVING
+    AVG(cu.preco) > 700
+ORDER BY
+    cat.descricao;
+```
+| nome_categoria  | preco_medio |
+|-----------------|-------------|
+| Machine Learning| 1000.00     |
+| Programação     | 950.00      |
+
+### LEFT JOIN
+LEFT JOIN (ou LEFT OUTER JOIN): Retorna todas as linhas da tabela da esquerda (a primeira tabela mencionada no FROM) e as linhas correspondentes da tabela da direita. Se não houver correspondência na tabela da direita, as colunas da direita terão valores NULL.
+
+Exemplo 1: Listar os nomes das categorias e os cursos associados à elas. Traga também categorias que não possuem nenhum curso associado
+
+```sql
+SELECT cat.descricao, c. codcur, c. nome, c. cargahoraria, c. preco 
+FROM categoria cat LEFT JOIN curso c 
+ON c.categoria=cat.codcat;
+```
+
+| descricao       | codcur | nome          | cargahoraria | preco   |
+|-----------------|--------|---------------|--------------|---------|
+| Programação     | 1      | Java          | 30           | 400.00  |
+| Banco de Dados  | 2      | PostgreSQL    | 30           | 600.00  |
+| Machine Learning| 3      | Deep Learning | 20           | 1000.00 |
+| Programação     | 4      | Python        | 20           | 500.00  |
+| Banco de Dados  | 5      | MySQL         | 30           | 500.00  |
+| Redes           |        |               |              |         |
+
+Exemplo 2: Listar os nomes das cidades e os nomes dos alunos pertencentes a elas. Traga também cidades que não possuem nenhum aluno associado
+
+```sql
+SELECT c.nome, a.nome
+FROM cidade c LEFT JOIN aluno a 
+ON c.codcid=a.cidade;
+```
+| nome          | nome    |
+|---------------|---------|
+| São Carlos    | Maria   |
+| São Carlos    | Celso   |
+| Araraquara    | Joaquim |
+| Londrina      | Florinda|
+| Londrina      | Manoel  |
+| Rio de Janeiro|         |
+| Curitiba      |         |
+| Rio Claro     |         |
+| Belo Horizonte|         |
+
+
+Exemplo 3: Listar os nomes das cidades que não possuem nenhum aluno associado a elas
+
+```sql
+SELECT c.nome
+FROM cidade c LEFT JOIN aluno a 
+ON c.codcid=a.cidade
+WHERE a.cidade is NULL;
+```
+| nome          |
+|---------------|
+| Rio de Janeiro|
+| Curitiba      |
+| Rio Claro     |
+| Belo Horizonte|
+
+Exemplo 4: Listar todos os cursos e, se houver alguma matrícula, mostrar o nome do aluno matriculado.
+
+```sql
+SELECT c.nome AS nome_curso, a.nome AS nome_aluno
+FROM curso AS c LEFT JOIN matricula AS m 
+ON c.codcur = m.codcur
+LEFT JOIN aluno AS a ON m.codalu = a.codalu;
+```    
+| nome_curso    | nome_aluno |
+|---------------|------------|
+| Java          | Maria      |
+| PostgreSQL    | Maria      |
+| PostgreSQL    | Florinda   |
+| Deep Learning |            |
+| Python        | Celso      |
+| Python        | Celso      |
+| MySQL         |            |
+
+### RIGHT JOIN
+RIGHT JOIN (ou RIGHT OUTER JOIN): Similar ao LEFT JOIN, mas retorna todas as linhas da tabela da direita e as linhas correspondentes da tabela da esquerda. Se não houver correspondência na tabela da esquerda, as colunas da esquerda terão valores NULL.   
+
+Exemplo: Listar todos os alunos e suas respectivas cidades. Traga também as cidades que não possuam nenhum aluno associado a elas.
+
+```sql
+SELECT a.codalu, a.cpf, a.nome, a.telefone, c.nome, c.uf
+FROM aluno a RIGHT JOIN cidade c
+ON a.cidade=c.codcid;
+```
+| codalu | cpf           | nome      | telefone    | nome          | uf |
+|--------|---------------|-----------|-------------|---------------|----|
+| 1      | 11111111111   | Maria     | 9999-9999   | São Carlos    | SP |
+| 2      | 22222222222   | Celso     | 8888-8888   | São Carlos    | SP |
+| 3      | 33333333333   | Joaquim   | 7777-7777   | Araraquara    | SP |
+| 4      | 44444444444   | Florinda  | 6666-6666   | Londrina      | PR |
+| 5      | 55555555555   | Manoel    |             | Londrina      | PR |
+|        |               |           |             | Rio de Janeiro| RJ |
+|        |               |           |             | Curitiba      | PR |
+|        |               |           |             | Rio Claro     | SP |
+|        |               |           |             | Belo Horizonte| MG |
+
+### FULL JOIN
+FULL OUTER JOIN (ou FULL JOIN): Retorna todas as linhas de ambas as tabelas. Se não houver correspondência entre as tabelas, as colunas da tabela sem correspondência terão valores NULL.
+
+Exemplo: Todas as linhas de todas as tabelas. Essa consulta lista todos os alunos e suas respectivas cidades (quando encontradas), bem como todas as cidades, mostrando NULL para as informações dos alunos nas cidades que não têm nenhum aluno cadastrado.
+```sql
+SELECT a.codalu, a.cpf, a.nome, a.telefone, c.nome, c.uf
+FROM aluno a FULL JOIN cidade c
+ON a.cidade=c.codcid;
+```
+| codalu | cpf           | nome      | telefone    | nome          | uf |
+|--------|---------------|-----------|-------------|---------------|----|
+| 1      | 11111111111   | Maria     | 9999-9999   | São Carlos    | SP |
+| 2      | 22222222222   | Celso     | 8888-8888   | São Carlos    | SP |
+| 3      | 33333333333   | Joaquim   | 7777-7777   | Araraquara    | SP |
+| 4      | 44444444444   | Florinda  | 6666-6666   | Londrina      | PR |
+| 5      | 55555555555   | Manoel    |             | Londrina      | PR |
+|        |               |           |             | Rio de Janeiro| RJ |
+|        |               |           |             | Curitiba      | PR |
+|        |               |           |             | Rio Claro     | SP |
+|        |               |           |             | Belo Horizonte| MG |
+
+### CROSS JOIN
+CROSS JOIN (ou produto cartesiano): Retorna todas as combinações possíveis de linhas entre as duas tabelas. Se a tabela A tem 'n' linhas e a tabela B tem 'm' linhas, o resultado terá 'n * m' linhas. Geralmente, usa-se com cuidado, pois pode gerar resultados muito grandes.
+
+```sql
+SELECT
+c.nome  nome_curso,
+cat.descricao  nome_categoria
+FROM curso c CROSS JOIN categoria cat;
+```    
+| nome_curso    | nome_categoria  |
+|---------------|-----------------|
+| Java          | Programação     |
+| Java          | Banco de Dados  |
+| Java          | Machine Learning|
+| Java          | Redes           |
+| PostgreSQL    | Programação     |
+| PostgreSQL    | Banco de Dados  |
+| PostgreSQL    | Machine Learning|
+| PostgreSQL    | Redes           |
+| Deep Learning | Programação     |
+| Deep Learning | Banco de Dados  |
+| Deep Learning | Machine Learning|
+| Deep Learning | Redes           |
+| Python        | Programação     |
+| Python        | Banco de Dados  |
+| Python        | Machine Learning|
+| Python        | Redes           |
+| MySQL         | Programação     |
+| MySQL         | Banco de Dados  |
+| MySQL         | Machine Learning|
+| MySQL         | Redes           |
+
+### SELF JOIN
+SELF JOIN é usado para juntar uma tabela com ela mesma. Isso é útil quando há uma relação hierárquica ou quando você precisa comparar linhas dentro da mesma tabela.
+
+Por exemplo, se a tabela aluno tivesse uma coluna referenciando um "responsável" (que também seria um aluno), você poderia usar um SELF JOIN para listar o aluno e seu responsável. 
+
+Outro exemplo: A consulta retorna pares de alunos diferentes que moram na mesma cidade.
+
+```sql
+SELECT
+a1.nome AS aluno1,
+a2.nome AS aluno2,
+a1.cidade AS cidade_aluno1
+FROM aluno AS a1
+INNER JOIN aluno AS a2 
+ON a1.cidade = a2.cidade AND a1.codalu <> a2.codalu;
+```    
+| aluno1  | aluno2  | cidade_aluno1 |
+|---------|---------|---------------|
+| Maria   | Celso   | 1             |
+| Celso   | Maria   | 1             |
+| Florinda| Manoel  | 3             |
+| Manoel  | Florinda| 3             |

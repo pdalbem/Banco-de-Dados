@@ -779,3 +779,122 @@ ON a1.cidade = a2.cidade AND a1.codalu <> a2.codalu;
 | Celso   | Maria   | 1             |
 | Florinda| Manoel  | 3             |
 | Manoel  | Florinda| 3             |
+
+## Subconsultas
+Uma subconsulta, também conhecida como consulta aninhada ou inner query, é uma instrução SELECT que é incorporada dentro de outra instrução SQL. Ela é utilizada para retornar dados que serão usados pela consulta principal (ou outer query). As subconsultas são uma ferramenta poderosa para lidar com operações que exigiriam múltiplas etapas ou lógicas complexas.
+
+Subconsultas podem ser utilizadas em diversas cláusulas de uma consulta SQL:
+
+**SELECT**: Para retornar um valor escalar ou uma lista de valores que complementam os resultados da consulta principal.
+
+**FROM**: Para criar uma tabela derivada (temporária) que a consulta principal pode tratar como uma tabela comum. Isso é útil para simplificar consultas complexas ou para realizar agregações antes da união com outras tabelas.
+
+**WHERE**: Para filtrar os resultados da consulta principal com base em critérios dinâmicos retornados pela subconsulta.
+
+**HAVING**: Similar ao WHERE, mas usado para filtrar grupos de linhas com base em resultados de subconsultas.
+
+**INSERT, UPDATE, DELETE**: Embora este documento se foque em DQL, é importante notar que subconsultas também podem ser empregadas em comandos DML para selecionar os dados a serem manipulados.
+
+
+### Tipos de Subconsultas
+Existem diferentes tipos de subconsultas, classificadas principalmente pelo número de valores que elas retornam e sua dependência da consulta externa:
+
+* Subconsultas Escalares (Single-Row Subquery):
+Retornam um único valor (uma única linha e uma única coluna).
+São frequentemente usadas em cláusulas SELECT ou WHERE para comparações, cálculos ou atribuições.
+Exemplo: Listar os alunos que moram na mesma cidade que a Maria
+```sql
+SELECT nome, cidade
+FROM aluno
+WHERE cidade = (SELECT cidade FROM aluno WHERE nome = 'Maria');
+```
+Neste exemplo, a subconsulta retorna o codcid da cidade onde "Maria" mora, e a consulta externa filtra os alunos que possuem o mesmo codcid.
+Resultado:
+
+| nome    | cidade |
+| ------- | ------ |
+| Maria   | 1      |
+| Celso   | 1      |
+
+* Subconsultas de Múltiplas Linhas (Multi-Row Subquery):
+
+Retornam uma ou mais linhas, mas geralmente uma única coluna.
+São usadas com operadores como IN, NOT IN, ANY, ALL, EXISTS, NOT EXISTS.
+Exemplo com IN: Listar os cursos que têm alunos matriculados.
+```sql
+SELECT nome AS nome_curso
+FROM curso
+WHERE codcur IN (SELECT codcur FROM matricula);
+```
+Esta subconsulta retorna os codcur de todos os cursos que possuem matrículas, e a consulta principal lista o nome desses cursos.
+Resultado:
+
+| nome       |
+| ---------- |
+| Java       |
+| PostgreSQL |
+| Python     |
+
+* Subconsultas Correlacionadas (Correlated Subquery):
+
+Fazem referência a uma ou mais colunas da consulta externa e são executadas uma vez para cada linha processada pela consulta externa.
+São mais complexas e podem ser mais lentas, mas permitem resolver questões complexas ao ajustar dinamicamente os critérios da busca interna.
+Exemplo: Listar os cursos cuja carga horária é maior que a média da carga horária dos cursos da mesma categoria.
+```sql
+SELECT c1.nome, c1.cargahoraria, ca.descricao AS categoria
+FROM curso c1
+JOIN categoria ca ON c1.categoria = ca.codcat
+WHERE c1.cargahoraria > (
+    SELECT AVG(c2.cargahoraria)
+    FROM curso c2
+    WHERE c2.categoria = c1.categoria
+);
+```
+Aqui, para cada curso na consulta externa (c1), a subconsulta calcula a média da carga horária apenas para os cursos da mesma categoria (c1.categoria).
+
+Resultado:
+
+| nome       | cargahoraria | categoria    |
+| ---------- | ------------ | ------------ |
+| Java       | 30           | Programação  |
+| PostgreSQL | 30           | Banco de Dados |
+
+
+* Subconsultas na Cláusula FROM (Derived Tables):
+
+A subconsulta é tratada como uma tabela temporária.
+Exemplo: Listar a média de notas por curso para os cursos que tiveram mais de uma matrícula.
+```sql
+SELECT
+    nome_curso,
+    media_notas
+FROM (
+    SELECT
+        cu.nome AS nome_curso,
+        AVG(m.nota) AS media_notas,
+        COUNT(m.codcur) AS total_matriculas
+    FROM
+        matricula AS m
+    JOIN
+        curso AS cu ON m.codcur = cu.codcur
+    GROUP BY
+        cu.nome
+) AS resumo_cursos
+WHERE
+    total_matriculas > 1;
+```
+Neste caso, a subconsulta no FROM (chamada resumo_cursos) calcula a média das notas e o total de matrículas para cada curso. A consulta externa então filtra esses resultados.
+
+Resultado:
+
+| nome_curso | media_notas |
+| ---------- | ----------- |
+| PostgreSQL | 9.5         |
+| Python     | 8.75        |    
+
+#### Boas Práticas
+Utilize subconsultas quando a lógica da consulta exigir múltiplas etapas ou dependências hierárquicas.
+
+Prefira junções (JOINs) quando possível, pois geralmente oferecem melhor desempenho.
+
+Evite subconsultas correlacionadas em grandes volumes de dados, pois podem impactar negativamente a performance.

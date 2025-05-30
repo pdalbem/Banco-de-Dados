@@ -12,11 +12,11 @@ services:
         networks:
             - postgres-db-network
     pgadmin:
-        image: dpage/pgadmin4:9.1.0
+        image: dpage/pgadmin4:9.4.0
         container_name: pgadmin_container
         environment:
-            PGADMIN_DEFAULT_EMAIL: 'dalbem@ifsp.edu.br'
-            PGADMIN_DEFAULT_PASSWORD: 'postgres'
+            PGADMIN_DEFAULT_EMAIL: 'SEU_EMAIL@SEU_EMAIL' # coloque seu email aqui
+            PGADMIN_DEFAULT_PASSWORD: 'SENHA'         # coloque uma senha aqui
         ports:
             - 16543:80
         volumes:

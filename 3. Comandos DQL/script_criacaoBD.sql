@@ -27,7 +27,7 @@ CREATE TABLE curso
 codcur int PRIMARY KEY,
 nome varchar(30) NOT NULL,
 cargahoraria int CHECK (cargahoraria > 0),
-preco real,
+preco decimal(10,2),
 categoria int,
 FOREIGN KEY(categoria) REFERENCES categoria(codcat)
 on update cascade on delete set null
@@ -80,9 +80,3 @@ insert into matricula values
 (2,4,8.5,'2023-12-10'),
 (4,2,9,'2024-04-01'),	
 (2,4,9.0,'2024-04-10');
-
-
-
-
-
-

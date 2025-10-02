@@ -32,11 +32,12 @@ CREATE TABLE matricula
   CONSTRAINT fk_curso FOREIGN KEY (codcur) REFERENCES curso(codcur)
 );
 
+--Resolução dos exercícios DDL
 --01
 alter table matricula add datacurso date;
 
 --02
-alter table curso add preco real check (preco>0);
+alter table curso add preco decimal(10,2) check (preco>0);
 
 --03
 create table categoria
@@ -48,6 +49,7 @@ create table categoria
 alter table curso add categoria int;
 alter table curso add constraint fk_categoria foreign key(categoria) references categoria(codcat);
 
+--Resolução dos exercícios DML
 --Exercício 1
 insert into cidade values
 (1,'São Carlos','SP'),

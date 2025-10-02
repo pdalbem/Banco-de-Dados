@@ -32,11 +32,12 @@ CREATE TABLE matricula
   CONSTRAINT fk_curso FOREIGN KEY (codcur) REFERENCES curso(codcur)
 );
 
+--Resolução dos exercícios propostos
 --01
 alter table matricula add datacurso date;
 
 --02
-alter table curso add preco real check (preco>0);
+alter table curso add preco decimal(10,2) check (preco>0);
 
 --03
 create table categoria

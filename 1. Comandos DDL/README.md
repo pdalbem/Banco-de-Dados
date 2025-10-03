@@ -20,11 +20,11 @@ O comando **CREATE TABLE** é utilizado para criar uma nova tabela dentro de um 
 Aqui está um exemplo básico de como usar o comando CREATE TABLE:
 
 ```sql
-CREATE TABLE nome_da_tabela (
-    coluna1 tipo_de_dado CONSTRAINTS,
-    coluna2 tipo_de_dado CONSTRAINTS,
-    coluna3 tipo_de_dado CONSTRAINTS,
+CREATE TABLE IF NOT EXISTS nome_da_tabela (
+    coluna1 tipo_de_dado [CONSTRAINT restricao],
+    coluna2 tipo_de_dado [CONSTRAINT restricao],
     ...
+    [CONSTRAINT nome_restricao tipo_de_restricao (coluna)]
 );
 ```
 sendo que

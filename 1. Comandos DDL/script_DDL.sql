@@ -26,7 +26,7 @@ CREATE TABLE matricula
 (
   codalu int,
   codcur int,
-  nota real CHECK (nota>=0 and nota <=10),
+  nota decimal(4,2) CHECK (nota>=0 and nota <=10),
   PRIMARY KEY (codalu,codcur),
   CONSTRAINT fk_aluno FOREIGN KEY (codalu) REFERENCES aluno(codalu),
   CONSTRAINT fk_curso FOREIGN KEY (codcur) REFERENCES curso(codcur)

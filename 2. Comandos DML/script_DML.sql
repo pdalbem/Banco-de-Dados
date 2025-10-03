@@ -26,7 +26,7 @@ CREATE TABLE matricula
 (
   codalu int,
   codcur int,
-  nota real CHECK (nota>=0 and nota <=10),
+  nota decimal(4,2) CHECK (nota>=0 and nota <=10),
   PRIMARY KEY (codalu,codcur),
   CONSTRAINT fk_aluno FOREIGN KEY (codalu) REFERENCES aluno(codalu),
   CONSTRAINT fk_curso FOREIGN KEY (codcur) REFERENCES curso(codcur)
@@ -85,9 +85,8 @@ insert into matricula values
 (2,4,8.5,'2023-12-10'),
 (4,2,9,'2024-04-01');
 
---Exercício 6
-insert into matricula values
-	(2,4,9.0,'2024-04-10');
+--Exercício 6 irá falhar, pois já existe PK
+--insert into matricula values (2,4,9.0,'2024-04-10');
 
 --Exercício 7
 alter table matricula
@@ -137,6 +136,3 @@ where uf='RJ';
 update curso
 set cargahoraria=cargahoraria+10
 where categoria=1 OR categoria=2;
-
-
-

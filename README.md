@@ -22,10 +22,20 @@ Usada para definir e modificar a estrutura dos objetos do banco de dados.
 ### Exemplo:
 ```sql
 CREATE TABLE aluno (
-    id SERIAL PRIMARY KEY,
+    id INT PRIMARY KEY,
     nome VARCHAR(100),
     idade INT
 );
+
+-- Alterando a tabela para adicionar uma nova coluna
+ALTER TABLE aluno ADD COLUMN email VARCHAR(150);
+
+-- Excluindo a tabela
+DROP TABLE aluno;
+
+-- Removendo todos os dados da tabela, mas mantendo a estrutura
+TRUNCATE TABLE aluno;
+
 ```
 
 ---
@@ -41,7 +51,17 @@ Usada para inserir, atualizar e excluir dados nas tabelas.
 
 ### Exemplo:
 ```sql
-INSERT INTO aluno (nome, idade) VALUES ('Maria', 22);
+-- Inserindo dados
+INSERT INTO aluno (id, nome, idade, email) 
+VALUES (1, 'Maria', 22, 'maria@email.com');
+
+INSERT INTO aluno VALUES (2, 'João', 20, 'joao@email.com');
+
+-- Atualizando dados
+UPDATE aluno SET idade = 23 WHERE id = 1;
+
+-- Excluindo um aluno
+DELETE FROM aluno WHERE nome = 'João';
 ```
 
 ---
@@ -55,7 +75,23 @@ Utilizada para consultar dados no banco.
 
 ### Exemplo:
 ```sql
-SELECT nome, idade FROM aluno WHERE idade > 20;
+-- Consultando todos os dados da tabela
+SELECT * FROM aluno;
+
+-- Consultando somente alguns campos
+SELECT nome, idade FROM aluno;
+
+-- Aplicando condições
+SELECT nome FROM aluno WHERE idade > 20;
+
+-- Ordenando resultados
+SELECT nome, idade FROM aluno ORDER BY idade DESC;
+
+-- Agregando dados (quantos alunos existem)
+SELECT COUNT(*) AS total_alunos FROM aluno;
+
+-- Agrupando por idade
+SELECT idade, COUNT(*) FROM aluno GROUP BY idade;
 ```
 
 ---
@@ -70,7 +106,14 @@ Controla o acesso aos dados e permissões dos usuários.
 
 ### Exemplo:
 ```sql
+-- Concedendo permissão de SELECT ao usuário
 GRANT SELECT ON aluno TO usuario1;
+
+-- Concedendo permissão total
+GRANT ALL PRIVILEGES ON aluno TO usuario2;
+
+-- Revogando permissão
+REVOKE SELECT ON aluno FROM usuario1;
 ```
 
 ---
@@ -86,8 +129,30 @@ Gerencia transações e garante a integridade dos dados.
 
 ### Exemplo:
 ```sql
+-- Iniciando uma transação
 BEGIN;
-UPDATE aluno SET idade = 23 WHERE nome = 'Maria';
+
+-- Atualizando dados
+UPDATE aluno SET idade = 25 WHERE id = 2;
+
+-- Confirmando as alterações
+COMMIT;
+
+-- Exemplo com ROLLBACK
+BEGIN;
+DELETE FROM aluno WHERE id = 1;
+
+-- Ops, erro! Desfazendo
+ROLLBACK;
+
+-- Exemplo com SAVEPOINT
+BEGIN;
+UPDATE aluno SET idade = 30 WHERE id = 2;
+SAVEPOINT antes_exclusao;
+DELETE FROM aluno WHERE id = 2;
+
+-- Se quiser voltar ao ponto antes da exclusão
+ROLLBACK TO antes_exclusao;
 COMMIT;
 ```
 

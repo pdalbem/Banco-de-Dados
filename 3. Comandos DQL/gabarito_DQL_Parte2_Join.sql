@@ -75,11 +75,12 @@ where m.codalu is null
 order by a.nome;
 
 --11
-select a.nome, m.datacurso
-from aluno a left join matricula m
-on a.codalu=m.codalu
-where extract(month from m.datacurso)!=4
-or m.codalu is null
+select a.nome
+from aluno a
+left join matricula m
+on a.codalu = m.codalu
+and EXTRACT(MONTH from m.datacurso) = 4
+where m.codalu is null
 order by a.nome;
 
 

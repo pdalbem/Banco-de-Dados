@@ -36,7 +36,7 @@ CREATE TABLE curso
 codcur int PRIMARY KEY,
 nome varchar(30) NOT NULL,
 cargahoraria int CHECK (cargahoraria > 0),
-preco real,
+preco decimal(10,2),
 categoria int,
 FOREIGN KEY(categoria) REFERENCES categoria(codcat)
 on update cascade on delete set null
@@ -46,7 +46,7 @@ CREATE TABLE matricula
 (
   codalu int,
   codcur int,
-  nota real CHECK (nota>=0 and nota <=10),
+  nota decimal(4,2) CHECK (nota>=0 and nota <=10),
   datacurso date,	
   PRIMARY KEY (codalu,codcur,datacurso),
   CONSTRAINT fk_aluno FOREIGN KEY (codalu) REFERENCES aluno(codalu) on update cascade,

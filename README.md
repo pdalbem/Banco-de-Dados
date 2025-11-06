@@ -35,7 +35,6 @@ DROP TABLE aluno;
 
 -- Removendo todos os dados da tabela, mas mantendo a estrutura
 TRUNCATE TABLE aluno;
-
 ```
 
 ---

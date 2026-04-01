@@ -124,9 +124,19 @@ where tombo=1;
 delete from livro
 where editora=1 or editora=2;
 
---9
+--Nesta tentativa, não foi possível excluir os livros Java (editora 1-Pearson) e nem Python (editora 2-LTC).
+--O SGBD está preservando a integridade referencial dos dados.
+--Isso porque os livros são referenciados nas tabelas exemplar e autorlivro.
+
+--Na tabela exemplar, a constraint fk_livro possui on delete set null. Então, OK. Era para permitir a exclusão.
+
+--Porém, na tabela autorlivro, a constraint fk_livro só possui cláusula on update. Não trata a exclusão (on delete). Por isso, não será possível remover estes livros.
+
+
+--9 Pode-se usar diretamente data_prevista_devolucao + 3. PostgreSQL entende que são 3 dias
+--Se fosse outra unidade (meses, horas, etc) usaria INTERVAL
 update emprestimo
-set data_prevista_devolucao = data_prevista_devolucao + INTERVAL '3 days'
+set data_prevista_devolucao = data_prevista_devolucao + 3
 where codusuario=1 and 
 	data_retirada='2024-04-18' or data_retirada='2024-04-19';
 	
